@@ -243,11 +243,11 @@ def get_flashcards_study(username, selected_search):
     WHERE 
         userName = ?
         AND selectedSearch = ?
-        AND DATE(datetimeNextStudy) <= DATETIME('now')
+        AND DATE(datetimeNextStudy) <= DATETIME('now', 'localtime', '-1 minute')
         AND flashcardName NOT IN (
             SELECT flashcardName 
             FROM flashcardStudyLog
-            WHERE DATE(datetimeNextStudy) > DATETIME('now')
+            WHERE DATE(datetimeNextStudy) > DATETIME('now', 'localtime')
         )
     GROUP BY 
         flashcardName
@@ -454,7 +454,7 @@ def get_user_stats(user_name: str) -> dict:
     conn = create_connection()
     query = """
         SELECT 
-            COUNT(*) AS total_reviews,
+            DISTINCT COUNT(flashcardName) AS total_reviews,
             COUNT(DISTINCT flashcardName) AS distinct_cards,
             AVG(easeFactor) AS avg_ease_factor,
             AVG(studyInterval) AS avg_interval
