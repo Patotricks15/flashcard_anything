@@ -12,6 +12,7 @@ import altair as alt
 import pandas as pd
 import openai
 
+
 def load_css(file_name):
     with open(file_name) as f:
         return f.read()
@@ -166,8 +167,8 @@ def study_flashcards():
 
 
 class KeyConcepts(BaseModel):
-    key_concepts: str = Field(..., title="Key Concepts", description="Key concepts extracted from the text")
-    definition: str = Field(..., title="Definition", description="Simple and short definition extracted from the text")
+    key_concepts: str = Field(..., title="Key Concepts", description="A single and relevant Key concept extracted from the text")
+    definition: str = Field(..., title="Definition", description="Simple and 3-lines technical definition of the key concept")
 
 
 class Flashcards(BaseModel):
@@ -175,8 +176,7 @@ class Flashcards(BaseModel):
     flashcards: List[KeyConcepts]
 
 
-model = ChatOpenAI(model="gpt-3.5-turbo-1106")
-
+model = ChatOpenAI(model="gpt-4o-mini")
 
 def user_performance_dashboard():
     """
@@ -208,24 +208,65 @@ def user_performance_dashboard():
     col4.metric("Average Interval", stats['avg_interval'])
 
     # 4) Daily Reviews Chart
-    # daily_reviews_df has columns: [study_date, reviews]
-    # Converting study_date to pandas datetime (if you want to manipulate in Altair)
-    daily_reviews_df['study_date'] = pd.to_datetime(daily_reviews_df['study_date'])
 
-    chart = (
-        alt.Chart(daily_reviews_df)
-        .mark_bar(color='steelblue')
-        .encode(
-            x=alt.X('study_date:T', title='Date'),
-            y=alt.Y('reviews:Q', title='Reviews'),
-            tooltip=['study_date', 'reviews']
-        )
-        .properties(title='Number of Reviews per Day')
-        .interactive()
+    df_reviews = get_daily_reviews_current_year(username)
+    df_reviews["study_date"] = pd.to_datetime(df_reviews["study_date"]).dt.date
+    df_reviews = df_reviews.groupby("study_date", as_index=False)["reviews"].sum()
+    current_year = datetime.today().year
+    today = pd.to_datetime("today").normalize()
+    start_date = today - pd.Timedelta(days=365)
+    end_date = today
+    all_days = pd.date_range(start_date, end_date)
+    df_calendar = pd.DataFrame({"date": all_days})
+    df_calendar["week"] = df_calendar["date"].dt.isocalendar().week
+    df_calendar["weekday"] = df_calendar["date"].dt.weekday
+    df_reviews["date"] = pd.to_datetime(df_reviews["study_date"])
+    df_merged = pd.merge(
+        df_calendar,
+        df_reviews[["date", "reviews"]],
+        how="left",
+        on="date"
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    df_merged["reviews"] = df_merged["reviews"].fillna(0).astype(int)
 
+    chart = (
+        alt.Chart(df_merged)
+        .mark_rect(
+            cornerRadius=3,
+            width = 11,
+            height = 11
+        )
+        .encode(
+            x=alt.X(
+                "date:T",
+                timeUnit="yearweek",
+                axis=alt.Axis(format="%b", title=None)
+            ),
+            y=alt.Y(
+                "date:T",
+                timeUnit="day",
+                sort=["mon","tue","wed","thu","fri","sat","sun"],
+                title=None
+            ),
+            color=alt.condition(
+                "datum.reviews > 0",
+                alt.Color("reviews:Q", scale=alt.Scale(scheme="greens"), title="Reviews", legend=None),
+                alt.value("#333333"),
+            ),
+            tooltip=[
+                alt.Tooltip("date:T", title="Data"),
+                alt.Tooltip("reviews:Q", title="Reviews")
+            ]
+        )
+        .properties(
+            width=800,
+            height=200,
+            title="Flashcards studied per day"
+        )
+    )
+
+    st.altair_chart(chart)
 
 def generate_flashcards():
     st.markdown(css, unsafe_allow_html=True)

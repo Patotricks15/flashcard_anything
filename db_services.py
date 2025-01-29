@@ -441,6 +441,28 @@ def get_daily_reviews(user_name: str) -> pd.DataFrame:
     conn.close()
     return df
 
+def get_daily_reviews_current_year(user_name: str) -> pd.DataFrame:
+    """
+    Returns a DataFrame with columns [study_date, reviews],
+    representing the number of reviews per day for the current year only.
+    """
+    conn = create_connection()
+    query = """
+        SELECT 
+            DATE(datetimeLastStudy) AS study_date,
+            COUNT(*) AS reviews
+        FROM flashcardStudyLog
+        WHERE 
+            userName = ?
+            AND reps > 0
+            AND datetimeLastStudy >= date('now','-365 day')
+        GROUP BY DATE(datetimeLastStudy)
+        ORDER BY DATE(datetimeLastStudy);
+    """
+    df = pd.read_sql_query(query, conn, params=(user_name,))
+    conn.close()
+    return df
+
 def get_user_stats(user_name: str) -> dict:
     """
     Returns a dictionary containing the user's general metrics:

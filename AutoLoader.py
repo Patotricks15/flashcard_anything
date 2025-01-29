@@ -65,6 +65,7 @@ class AutoLoaderDocument:
                 with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
                     tmp_file.write(self.document.read())
                     tmp_file_path = tmp_file.name
+                    print(tmp_file_path)
                     self.document_name = tmp_file.name
                 
                 doc = loader_class(tmp_file_path).load()
