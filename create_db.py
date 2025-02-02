@@ -1,11 +1,11 @@
 import sqlite3
 
 def create_empty_db():
-    # Cria (ou conecta) ao banco de dados
+    # Connect to a local database
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
 
-    # Cria a tabela de usuários
+    # Create the user table
     c.execute('''
         CREATE TABLE IF NOT EXISTS users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,7 +14,7 @@ def create_empty_db():
         );
     ''')
 
-    # Cria a tabela de pesquisas do usuário
+    # Create the user search table
     c.execute('''
         CREATE TABLE IF NOT EXISTS usersSearch(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
