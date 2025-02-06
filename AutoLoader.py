@@ -10,7 +10,6 @@ from goose3 import Goose
 import tempfile
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-
 class Website:
     def __init__(self, search):
         self.search = search
@@ -44,6 +43,18 @@ class Pdf:
 
 class AutoLoaderDocument:
     def __init__(self, search = '', document=None, huge_file=False):
+        """
+        Constructor for AutoLoaderDocument
+        
+        Parameters
+        ----------
+        search : str
+            The search query to use for downloading a webpage or YouTube video
+        document : bytes
+            The raw document to load
+        huge_file : bool
+            Whether the document is huge and needs to be loaded in chunks
+        """
         self.document = document
         self.search = search
         self.huge_file = huge_file
@@ -57,6 +68,15 @@ class AutoLoaderDocument:
         }
     
     def extract_text(self):
+        """
+        Extract text from the document.
+
+        If the document is uploaded, extract text from it directly.
+        If the document is huge, split it into chunks of 4000 characters with an overlap of 400 characters.
+        If the document is None, raise ValueError.
+        If the document is of unsupported type, raise ValueError.
+        Otherwise, return the extracted text as a string.
+        """
         if self.document is not None:
             extension = self.document.name.split('.')[-1]
             if extension in self.loaders:

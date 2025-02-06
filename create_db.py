@@ -2,6 +2,21 @@ import sqlite3
 
 def create_empty_db():
     # Connect to a local database
+    """
+    Initializes an SQLite database with the necessary tables for the application.
+
+    This function connects to a local SQLite database ('my_database.db') and creates 
+    the following tables if they do not already exist:
+    - users: Stores user information with unique user IDs.
+    - usersSearch: Records user searches and associated flashcards with timestamps.
+    - flashcardStudyLog: Logs flashcard study sessions with study intervals and ease factors.
+    - userDocuments: Stores uploaded documents as binary data.
+
+    Additionally, a unique index is created on the usersSearch table to prevent duplicate entries.
+
+    After creating the tables, the connection to the database is closed.
+    """
+
     conn = sqlite3.connect('my_database.db')
     c = conn.cursor()
 

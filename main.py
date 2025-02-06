@@ -14,10 +14,32 @@ import openai
 
 
 def load_css(file_name):
+    """
+    Reads a CSS file and returns its content as a string.
+
+    Parameters
+    ----------
+    file_name : str
+        The file name of the CSS file to be read.
+
+    Returns
+    -------
+    str
+        The content of the CSS file as a string.
+
+    """
     with open(file_name) as f:
         return f.read()
     
 def signup_section():
+    """
+    Streamlit section for creating a new user account.
+
+    Contains a form to input a username and password, and a button to register.
+    If the form is incomplete, shows a warning. If the passwords do not match,
+    shows an error. If the username already exists, shows an error. Otherwise,
+    creates a new user and shows a success message.
+    """
     st.subheader("Create Account")
 
     new_user = st.text_input("Username")
@@ -43,6 +65,16 @@ def signup_section():
 
 
 def login_section():
+    """
+    Streamlit section for user login.
+
+    Prompts the user to enter their username and password,
+    and checks if the credentials are valid by calling the
+    login_user function. If the credentials are valid, it
+    stores the user in the session state and displays a
+    success message. Otherwise, it displays an error
+    message.
+    """
     st.subheader("Login")
 
     user = st.text_input("Username")
@@ -269,6 +301,25 @@ def user_performance_dashboard():
     st.altair_chart(chart)
 
 def generate_flashcards():
+    """
+    Generates flashcards from a document.
+
+    This function generates flashcards from a document by extracting the text, 
+    processing it with the LLM, and saving the flashcards to the database.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    This function uses the LLM from langchain to process the text and generate the flashcards.
+    The flashcards are saved to the database using the add_flashcard_study function.
+    """
     st.markdown(css, unsafe_allow_html=True)
 
     st.title("Key Concepts Extraction - Streamlit App")
